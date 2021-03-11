@@ -3,6 +3,8 @@ An RGB Lamp that changes it's colour based on the current electricity consumptio
 
 
 There are a few different all these files are placed an run on:
+
+
  Arduino Pro Mini at the electricity meter acting as the transmitter unit: 
   - Electricity_Monitoring_Lamp_Tx.ino
  

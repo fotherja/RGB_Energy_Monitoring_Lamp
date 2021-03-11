@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Flat 159 Energy Monitoring</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+		<script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+    		
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	
+	<body>
+		<!-- Header -->
+		<div class="header">
+		  <h1>Flat 159 Energy Monitoring</h1>
+		</div>
+
+		<!-- Navigation Bar -->
+		<div class="navbar">
+		  <a href="#">Day</a>
+		  <a href="#">Week</a>
+		  <a href="#">Month</a>
+		  <a href="#">Year</a>
+		  <button type="button" onclick="ShiftDateBackward()"><b><</b></button>
+		  <button type="button" onclick="ShiftDateForwards()"><b>></b></button>
+		</div>		
+
+		<!-- The flexible grid (content) -->
+				  
+	  <div class="main">
+		<u><h2 id="EnergyUsageDate"></h2></u>
+		
+		<!-- canvas element in a container -->
+		<div class="wrapper">
+			<canvas id="canvas" width="1200" height="450"></canvas>
+		</div>	
+
+		<h2 id="TotalWhUsed">data missing</h2>
+		<br>		
+	  </div>
+
+    <!-- call external script to create and render a chart on the canvas -->
+    <script src="Z1.js"></script>	
+	</body>
+</html>

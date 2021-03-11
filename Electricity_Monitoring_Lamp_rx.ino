@@ -8,21 +8,23 @@
  * 
  * Finer details:
  *  - A logarithmic scale is used to select the Hue. ie. Hue = ln(Power)
+ *  - We transmit the current minute's flash count over serial to a receiving raspberry pi
  * 
  */
 
 #include "Average.h"
 
-#define     BLUE_LED      9
-#define     RED_LED       10
-#define     GREEN_LED     11
-#define     PRO_MINI_LED  13                                                    // Flashes for each received packet (for debugging)    
+#define     BLUE_LED        9
+#define     RED_LED         10
+#define     GREEN_LED       11
+#define     PRO_MINI_LED    13                                                  // Flashes for each received packet (for debugging)    
 
-#define     POWER_USAGE_K 3.6e6
+#define     POWER_USAGE_K   3.6e6
+#define     RPI_TX_PERIOD   60000
 
-#define     R_PWM         OCR1B
-#define     G_PWM         OCR2A
-#define     B_PWM         OCR1A
+#define     R_PWM           OCR1B
+#define     G_PWM           OCR2A
+#define     B_PWM           OCR1A
 
 typedef struct {
     double r;                                                                   // a fraction between 0 and 1
@@ -57,28 +59,36 @@ void setup() {
   TCCR2A = 0b10000011;
   TCCR2B = 0b00000001;                                                          // Timer 2Fast PWM, No Prescaling = 62.5KHz PWM
 
-  Serial.begin(115200);                                                         // Used to recieve UART from the RF transceiver 
+  Serial.begin(115200);                                                         // Used to recieve UART from the RF transceiver and transmit to the RPi 
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
 //#############################################################################################################################
 //-----------------------------------------------------------------------------------------------------------------------------
 void loop() 
-{  
+{    
   static unsigned long Last_Flash_Timestamp = 0, Next_Expected_Flash_Time = 0, Flash_Interval_Time = 0;
+  static unsigned long Next_RPi_Tx_Time = millis(), Flash_Count = 0;
   static float Current_Power_Consumption;
 
   // Wait for a flash impulse, whilst waiting, if we pass the expected flash time we update the current power every 1000ms based on the latest wait
   while(!Serial.available())  {
     delay(5);
 
-    if(millis() > Next_Expected_Flash_Time)
+    if(millis() > Next_Expected_Flash_Time)                                     // Improtant, otherwise if energy usuage suddenly decreased it'd take ages to update
     {
       Next_Expected_Flash_Time += 1000;
       
       Flash_Interval_Time = millis() - Last_Flash_Timestamp;
       Current_Power_Consumption = POWER_USAGE_K / (float)Flash_Interval_Time;
       Update_Lamp_Colour(Current_Power_Consumption);
+    }
+
+    if(millis() >= Next_RPi_Tx_Time)
+    {
+      Next_RPi_Tx_Time += RPI_TX_PERIOD;      
+      Flash_Count = 0;
+      Serial.println(Flash_Count);
     }
   }
 
@@ -88,6 +98,9 @@ void loop()
   Last_Flash_Timestamp      = millis();  
 
   digitalWrite(PRO_MINI_LED, HIGH);
+  Flash_Count++;                                                                // Keep a count of flashes which we transmit and reset every 60 seconds 
+  Serial.println(Flash_Count);
+  
   while(Serial.available())  {
     delay(25);
     Serial.read();
@@ -105,12 +118,17 @@ void Update_Lamp_Colour(float Power_f)
 {
   static Average Average(10);                                                   // Configures a 10 sample rolling average filter
  
-  int Avg_Power = (int)Power_f;
-  Avg_Power = constrain(Avg_Power, 0, 7500);                                    // If we're using >7.5kW we just remain cherry red
-  Avg_Power = Average.Rolling_Average(Avg_Power);
+  int Avg_Power_I = (int)Power_f;
+  Avg_Power_I = constrain(Avg_Power_I, 0, 7500);                                // If we're using >7.5kW we just remain cherry red
+  
+  int Avg_Power = Average.Rolling_Average(Avg_Power_I);
+
+  if(Avg_Power < 720)  {                                                        // If we're using small amounts of power we do less filtering
+    Avg_Power = Average.Rolling_Average(Avg_Power_I);
+  } 
 
   float Avg_Power_f = (float)Avg_Power;
-  float Scaled_Power_f = 72.8 * log(1.0 + (0.005 * Avg_Power_f));               // This applies our logarithmic scaling
+  float Scaled_Power_f = 72.5 * log(1.0 + (0.005 * Avg_Power_f));               // This applies our logarithmic scaling
 
   Scaled_Power_f = 250.0 - Scaled_Power_f;                                      // This makes our Hue go from Blue to Red rather than vice versa
   if(Scaled_Power_f < 0.0)  {                                                   // Hue is an angle so keep it in the 0-360 range

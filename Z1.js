@@ -119,14 +119,25 @@ function DateGivenOffset(Offset)	{
 
 function Calculate_Data()	{
 	var TotalWh = 0;
+	var NowkWatts = 0;
 	
 	for (var i = 0; i < 288; i++) {
 	   TotalWh += y_data[i];	   
 	}
-
-	var TotalkWhFixedDP = (TotalWh/1000).toFixed(2);
 	
-	document.getElementById("TotalWhUsed").innerHTML = "Total: " + TotalkWhFixedDP.toString() + "kWh";
+	for (var i = 287; i >= 0; i--) {
+		NowkWatts = y_data[i] * 12;	
+		if(NowkWatts != 0)	{
+			break;
+		}
+	}	
+
+	var TodayCost = ((TotalWh * 0.0001613) + 0.2019).toFixed(2);
+	var TotalkWhFixedDP = (TotalWh/1000).toFixed(2);	
+	
+	document.getElementById("TotalWhUsed").innerHTML = "Last 5 minute average: " + NowkWatts.toString() + 
+													   " Watts, Today's Total: " + TotalkWhFixedDP.toString() +
+													   " kWh, Cost: £" + TodayCost.toString();
 }
 
 

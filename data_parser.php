@@ -1,7 +1,7 @@
 <?php	
 	$DayOffset = strtotime($_REQUEST["q"] . " days");
 	
-	$FileTodayName = "Energy-" . date("d-M-y", $DayOffset) . ".txt";
+	$FileTodayName = "Energy_Logs/Energy-" . date("d-m-y", $DayOffset) . ".txt";
 	
 	$Logfile = fopen($FileTodayName, "r") or die("Unable to open file!");
 	$DataToTx = fopen("DataToTx.txt", "w") or die("Unable to open file!");
@@ -18,11 +18,11 @@
 		{
 			fwrite($DataToTx, (string)$Sum);			//Add the 5 minute sum
 			
-			if($MinuteCount != 1440)
+			if($MinuteCount == 1440)
 			{
-				fwrite($DataToTx, ",");
+				break;
 			}
-			
+			fwrite($DataToTx, ",");
 			$Sum = 0;
 		}		
 	}

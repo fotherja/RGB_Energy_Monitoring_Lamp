@@ -3,7 +3,7 @@ import datetime
 import time
 
 ser = serial.Serial(
-                       port='/dev/serial0',					#port='/dev/ttyUSB0',        /dev/ttyAMA0
+                       port='/dev/serial0',					
                        baudrate = 115200,
                        parity=serial.PARITY_NONE,
                        stopbits=serial.STOPBITS_ONE,
@@ -20,15 +20,14 @@ while(True):
 
 	if(Minute_Flashes == 0):		 						# A new minute has been determined on the Arduino, log data in the current minute slot
 		x = datetime.datetime.now()
-		DateLogPath = "/home/pi/Energy_Lamp/Energy_Logs/"
-		FileTodayStr = DateLogPath + "Energy-" + x.strftime("%d") + "-" + x.strftime("%b") + "-" + x.strftime("%y") + ".txt"
-		CurrentTimeStr = x.strftime("%H") + ":" + x.strftime("%M") + " "
+		DateLogPath = "/var/www/html/Energy_Logs/"
+		FileTodayStr = DateLogPath + "Energy-" + x.strftime("%d") + "-" + x.strftime("%m") + "-" + x.strftime("%y") + ".txt"
 
 		f = open(FileTodayStr, "a")
-		f.write(CurrentTimeStr)
 		f.write(str(High_Count) + "\n")
 		f.close()
 
 	High_Count = Minute_Flashes
 	print(Minute_Flashes)
+
 	

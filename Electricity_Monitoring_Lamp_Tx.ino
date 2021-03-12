@@ -4,7 +4,7 @@
  * Energy Monitoring Lamp TX
  * 
  * This software is the transmitter for the energy monitoring lamp. A photoresistor is bluetacked to the electricity meter's IMP light. It flashes 1000 times per KwH
- * The photoresistor pulls up pin A0 to 5v and there's a 220K pull down resistor.
+ * The photoresistor is a pulls up pin A0 to 5v and there's a 220K pull down resistor.
  * 
  * So how does this work?
  *  - The ADC samples at ~4KHz. When a sample is above a threshold FLASH_ADC_THRESHOLD then we detect a flash.

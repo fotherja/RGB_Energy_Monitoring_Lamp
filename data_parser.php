@@ -1,7 +1,7 @@
 <?php	
 	$DayOffset = strtotime($_REQUEST["q"] . " days");
 	
-	$FileTodayName = "Energy_Logs/Energy-" . date("d-m-y", $DayOffset) . ".txt";
+	$FileTodayName = "Energy_Logs/Energy-" . date("y-m-d", $DayOffset) . ".txt";
 	
 	$Logfile = fopen($FileTodayName, "r") or die("Unable to open file!");
 	$DataToTx = fopen("DataToTx.txt", "w") or die("Unable to open file!");

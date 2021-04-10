@@ -19,7 +19,7 @@
 #define     GREEN_LED       11
 #define     PRO_MINI_LED    13                                                  // Flashes for each received packet (for debugging)    
 
-#define     POWER_USAGE_K   3.6e6
+#define     POWER_USAGE_K   1.8e6
 #define     RPI_TX_PERIOD   60000
 
 #define     R_PWM           OCR1B
@@ -73,8 +73,6 @@ void loop()
 
   // Wait for a flash impulse, whilst waiting, if we pass the expected flash time we update the current power every 1000ms based on the latest wait
   while(!Serial.available())  {
-    delay(5);
-
     if(millis() > Next_Expected_Flash_Time)                                     // Improtant, otherwise if energy usuage suddenly decreased it'd take ages to update
     {
       Next_Expected_Flash_Time += 1000;
@@ -87,9 +85,10 @@ void loop()
     if(millis() >= Next_RPi_Tx_Time)
     {
       Next_RPi_Tx_Time += RPI_TX_PERIOD;      
-      Flash_Count = 0;
       Serial.println(Flash_Count);
     }
+
+    delay(5);    
   }
 
   // We get here if a flash has just occurred. Update all our metrics, clear the RX buffer and update the lamp colour
@@ -98,11 +97,11 @@ void loop()
   Last_Flash_Timestamp      = millis();  
 
   digitalWrite(PRO_MINI_LED, HIGH);
-  Flash_Count++;                                                                // Keep a count of flashes which we transmit and reset every 60 seconds 
+  Flash_Count++;                                                                // Keep a count of flashes which we transmit every 60 seconds 
   Serial.println(Flash_Count);
   
   while(Serial.available())  {
-    delay(25);
+    delay(5);
     Serial.read();
   }
   digitalWrite(PRO_MINI_LED, LOW);
@@ -119,15 +118,9 @@ void Update_Lamp_Colour(float Power_f)
   static Average Average(10);                                                   // Configures a 10 sample rolling average filter
  
   int Avg_Power_I = (int)Power_f;
-  Avg_Power_I = constrain(Avg_Power_I, 0, 7500);                                // If we're using >7.5kW we just remain cherry red
+  Avg_Power_I = constrain(Avg_Power_I, 0, 7200);                                // If we're using >7.2kW we just remain cherry red
+  float Avg_Power_f = (float)Average.Rolling_Average(Avg_Power_I);
   
-  int Avg_Power = Average.Rolling_Average(Avg_Power_I);
-
-  if(Avg_Power < 720)  {                                                        // If we're using small amounts of power we do less filtering
-    Avg_Power = Average.Rolling_Average(Avg_Power_I);
-  } 
-
-  float Avg_Power_f = (float)Avg_Power;
   float Scaled_Power_f = 72.5 * log(1.0 + (0.005 * Avg_Power_f));               // This applies our logarithmic scaling
 
   Scaled_Power_f = 250.0 - Scaled_Power_f;                                      // This makes our Hue go from Blue to Red rather than vice versa

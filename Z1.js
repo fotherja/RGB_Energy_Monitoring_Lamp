@@ -34,9 +34,9 @@ function load_graph(event)	{
 		type: 'bar',
 		data: {
 			datasets: [{
-				backgroundColor: 'rgba(255, 99, 132, 0.6)',
-				borderColor: 'rgba(255, 99, 132, 0.6)',
-				borderWidth: 0,
+				backgroundColor: 'rgba(255, 99, 132, 1.0)',
+				borderColor: 'rgba(255, 99, 132, 1.0)',
+				borderWidth: 1,
 				data: y_data,
 			}],
 			labels: x_data
@@ -49,11 +49,11 @@ function load_graph(event)	{
 				yAxes: [{
 					ticks: {	
 						min: 0,
-						max: 500
+						max: 800
 					},
 					scaleLabel: {
 						display: true,
-						labelString: 'Watt hours'
+						labelString: '0.5 Watt hours'
 					}
 				}],
 				xAxes: [{				
@@ -122,11 +122,11 @@ function Calculate_Data()	{
 	var NowkWatts = 0;
 	
 	for (var i = 0; i < 288; i++) {
-	   TotalWh += y_data[i];	   
+	   TotalWh += y_data[i]/2;	   
 	}
 	
 	for (var i = 287; i >= 0; i--) {
-		NowkWatts = y_data[i] * 12;	
+		NowkWatts = y_data[i] * 6;	
 		if(NowkWatts != 0)	{
 			break;
 		}

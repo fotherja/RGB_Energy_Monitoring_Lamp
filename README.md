@@ -2,7 +2,7 @@
 An RGB Lamp that changes it's colour based on the current electricity consumption
 
 
-There are a few different all these files are placed an run on:
+There are a few different places all these files are run on:
 
 
  Arduino Pro Mini at the electricity meter acting as the transmitter unit: 
